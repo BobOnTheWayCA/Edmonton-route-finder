@@ -1,0 +1,83 @@
+Name: Shijie Bu
+SID: 1720680
+CCID: sbu1
+COURSE: CMPUT 275 Winter 2022
+PROJECT NAME: Assign 1 Part 2 Client/Server Application
+
+This is a standalone C++ program that emulates the route-finding server. 
+It reads the coor- dinates of the trip start and end points from the client 
+and give back the route information to the client.
+
+Containning files:
+	client.py
+	map pngs
+	edmonton-roads-2.0.1.txt
+	server.cpp
+	dijkstra.cpp
+	dijkstra.h
+	all source code and header files related to the graph and weighted graph class.
+	Makefile
+	README
+
+To run and compile the file:
+	run:
+		g++ -std=c++11 -c server/server.cpp
+		g++ -std=c++11 -c server/digraph.cpp
+		g++ -std=c++11 -c server/dijkstra.cpp
+		g++ -std=c++11 -o server/server digraph.o dijkstra.o server.o
+		./server/server
+
+	clean:
+		rm -f inpipe
+		rm -f outpipe
+		rm -f digraph.o dijkstra.o server.o server/server
+
+Input & Output:
+	---(FOR DEVELOPERS ONLY, OTHERWISE, USE THE CLIENT)---
+	Communication via a Pair of Pipes
+	When the user selects both start and end points of a trip,
+	the plotter program writes the respective coor- dinates at 
+	once to a named pipe, called inpipe, as shown below:
+		53.530870 -113.532972
+		53.530870 -113.514991
+	The route-finding server will read the coordinates from this 
+	pipe to compute the shortest path. Subse- quently, it will write 
+	the waypoints along the shortest path to another pipe, called 
+	outpipe, so that the client can read the coordinates of the waypoints 
+	and display the route by drawing a line between every two waypoints:
+		53.53087 -113.53297
+		53.51620 -113.53297
+		53.51620 -113.51499
+		53.53087 -113.51499
+		E
+	The character 'E' in the last line signals the plotter that there are no 
+	more waypoint coordinates to read from the pipe for this route. Note, no 
+	trailing spaces are at the end of each line, and there is a single 
+	space character between the latitude and longitude of every waypoint. Each 
+	line above must end with the newline character ('\n').
+
+
+Containning Core Algorithm:
+
+	Dijkstra’s Algorithm:
+		Compute least cost paths that start from a given vertex.
+		Use a binary heap to efficiently retrieve an unexplored
+		vertex that has the minimum distance from the start vertex
+		at every iteration.
+
+Note:
+	The client sends the route request in two lines without adding the 'R' character. 
+	Additionally, the server does not send the number of waypoints and does 
+	not expect an acknowledgement after sending the coordinates of each waypoint.
+	The server only sends the 'E' character after writing all waypoints for 
+	a route request to outpipe. Note that in the conversion to 100,000-ths 
+	of degrees, the last digit of coordinates will be chopped off as explained before.
+	After the coordinates of start and end points are sent to the server, 
+	the client goes to a state where it waits on receiving waypoints’ coordinates
+	from the server. When the route is displayed completely, the user can continue 
+	scrolling around on the map. If they select new start and end points, a new path 
+	should be retrieved from the server. Therefore, the server must wait for the next 
+	request from the client as soon as it answers a route request query. Finally, when 
+	the user closes the plotter window, the client writes a single character, 'Q', to 
+	the pipe. The server must clean up and quit, if it reads this character from the 
+	pipe.

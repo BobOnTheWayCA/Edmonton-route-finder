@@ -1,0 +1,7 @@
+g++ -std=c++11 -c server/server.cpp
+g++ -std=c++11 -c server/digraph.cpp
+g++ -std=c++11 -c server/dijkstra.cpp
+g++ -std=c++11 -o server/server digraph.o dijkstra.o server.o
+./server/server
+inpipe opened...
+outpipe opened...
